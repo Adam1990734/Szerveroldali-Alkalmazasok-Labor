@@ -15,6 +15,8 @@ namespace EstateFlow.Server.Data
         public DbSet<MeterReading> MeterReadings => Set<MeterReading>();
         public DbSet<Tenant> Tenants => Set<Tenant>();
         public DbSet<Rental> Rentals => Set<Rental>();
+        public DbSet<Invoice> Invoices => Set<Invoice>();
+        public DbSet<Contract> Contracts => Set<Contract>();
 
         public EstateFlowDbContext(DbContextOptions options) : base(options)
         {
@@ -43,6 +45,16 @@ namespace EstateFlow.Server.Data
                 .WithMany(t => t.Providers)
                 .HasForeignKey(p => p.UtilityTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Invoice>()
+                .HasOne(i => i.Provider)
+                .WithMany()
+                .HasForeignKey(i => i.ProviderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Invoice>()
+                .Property(i => i.Amount)
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<MeterReading>()
                 .HasOne(r => r.Meter)
