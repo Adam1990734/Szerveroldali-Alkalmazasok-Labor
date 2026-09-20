@@ -17,6 +17,8 @@ namespace EstateFlow.Server.Data
         public DbSet<Rental> Rentals => Set<Rental>();
         public DbSet<Invoice> Invoices => Set<Invoice>();
         public DbSet<Contract> Contracts => Set<Contract>();
+        public DbSet<Expense> Expenses => Set<Expense>();
+        public DbSet<Payment> Payments => Set<Payment>();
 
         public EstateFlowDbContext(DbContextOptions options) : base(options)
         {
@@ -69,6 +71,24 @@ namespace EstateFlow.Server.Data
             modelBuilder.Entity<MeterReading>()
                 .Property(r => r.Value)
                 .HasPrecision(18, 3);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Tenant)
+                .WithMany()
+                .HasForeignKey(p => p.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Expense>()
+                .Property(e => e.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.RentAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.UtilitiesAmount)
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<City>().HasData(
                 new City { Id = 1, Name = "Budapest" },
@@ -321,6 +341,124 @@ namespace EstateFlow.Server.Data
                     MonthlyRent = 150000m,
                     PropertyId = new Guid("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"),
                     TenantId = new Guid("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+                }
+            );
+
+            modelBuilder.Entity<Expense>().HasData(
+                new Expense
+                {
+                    Id = new Guid("a3d92f10-4b6e-4c2a-9d1f-7e8b5c3a2001"),
+                    PaidAt = new DateTime(2026, 3, 12, 14, 20, 0, DateTimeKind.Utc),
+                    Amount = 28500m,
+                    Type = "Repair",
+                    Name = "Vízvezeték-javítás a fürdőszobában",
+                    Note = null,
+                    PropertyId = new Guid("0f8fad5b-d9cb-469f-a165-70867728950e")
+                },
+                new Expense
+                {
+                    Id = new Guid("a3d92f10-4b6e-4c2a-9d1f-7e8b5c3a2002"),
+                    PaidAt = new DateTime(2026, 4, 5, 9, 0, 0, DateTimeKind.Utc),
+                    Amount = 18000m,
+                    Type = "Maintenance",
+                    Name = "Gázkazán éves karbantartása",
+                    Note = "kötelező éves felülvizsgálat",
+                    PropertyId = new Guid("0f8fad5b-d9cb-469f-a165-70867728950e")
+                },
+                new Expense
+                {
+                    Id = new Guid("a3d92f10-4b6e-4c2a-9d1f-7e8b5c3a2003"),
+                    PaidAt = new DateTime(2026, 4, 20, 11, 30, 0, DateTimeKind.Utc),
+                    Amount = 45200m,
+                    Type = "Tax",
+                    Name = "Építményadó, I. félév",
+                    Note = null,
+                    PropertyId = new Guid("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d")
+                },
+                new Expense
+                {
+                    Id = new Guid("a3d92f10-4b6e-4c2a-9d1f-7e8b5c3a2004"),
+                    PaidAt = new DateTime(2026, 5, 8, 16, 45, 0, DateTimeKind.Utc),
+                    Amount = 12900m,
+                    Type = "Maintenance",
+                    Name = "Zárcsere a bejárati ajtón",
+                    Note = null,
+                    PropertyId = new Guid("7c9e6679-7425-40de-944b-e07fc1f90ae7")
+                }
+            );
+
+            modelBuilder.Entity<Payment>().HasData(
+                new Payment
+                {
+                    Id = new Guid("c7e14b20-8f3a-4d5b-a2c9-1f6e9d8b3001"),
+                    PaidAt = new DateTime(2026, 3, 3, 10, 15, 0, DateTimeKind.Utc),
+                    RentAmount = 240000m,
+                    UtilitiesAmount = 36500m,
+                    PeriodYear = 2026,
+                    PeriodMonth = 3,
+                    Note = null,
+                    TenantId = new Guid("c56a4180-65aa-42ec-a945-5fd21dec0538"),
+                    PropertyId = new Guid("0f8fad5b-d9cb-469f-a165-70867728950e")
+                },
+                new Payment
+                {
+                    Id = new Guid("c7e14b20-8f3a-4d5b-a2c9-1f6e9d8b3002"),
+                    PaidAt = new DateTime(2026, 4, 2, 8, 40, 0, DateTimeKind.Utc),
+                    RentAmount = 240000m,
+                    UtilitiesAmount = 41200m,
+                    PeriodYear = 2026,
+                    PeriodMonth = 4,
+                    Note = null,
+                    TenantId = new Guid("c56a4180-65aa-42ec-a945-5fd21dec0538"),
+                    PropertyId = new Guid("0f8fad5b-d9cb-469f-a165-70867728950e")
+                },
+                new Payment
+                {
+                    Id = new Guid("c7e14b20-8f3a-4d5b-a2c9-1f6e9d8b3003"),
+                    PaidAt = new DateTime(2026, 5, 4, 19, 5, 0, DateTimeKind.Utc),
+                    RentAmount = 240000m,
+                    UtilitiesAmount = 33800m,
+                    PeriodYear = 2026,
+                    PeriodMonth = 5,
+                    Note = "két nap késéssel érkezett",
+                    TenantId = new Guid("c56a4180-65aa-42ec-a945-5fd21dec0538"),
+                    PropertyId = new Guid("0f8fad5b-d9cb-469f-a165-70867728950e")
+                },
+                new Payment
+                {
+                    Id = new Guid("c7e14b20-8f3a-4d5b-a2c9-1f6e9d8b3004"),
+                    PaidAt = new DateTime(2026, 6, 2, 12, 0, 0, DateTimeKind.Utc),
+                    RentAmount = 240000m,
+                    UtilitiesAmount = 30150m,
+                    PeriodYear = 2026,
+                    PeriodMonth = 6,
+                    Note = null,
+                    TenantId = new Guid("c56a4180-65aa-42ec-a945-5fd21dec0538"),
+                    PropertyId = new Guid("0f8fad5b-d9cb-469f-a165-70867728950e")
+                },
+                new Payment
+                {
+                    Id = new Guid("c7e14b20-8f3a-4d5b-a2c9-1f6e9d8b3005"),
+                    PaidAt = new DateTime(2026, 5, 10, 7, 55, 0, DateTimeKind.Utc),
+                    RentAmount = 150000m,
+                    UtilitiesAmount = 22400m,
+                    PeriodYear = 2026,
+                    PeriodMonth = 5,
+                    Note = null,
+                    TenantId = new Guid("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+                    PropertyId = new Guid("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d")
+                },
+                new Payment
+                {
+                    Id = new Guid("c7e14b20-8f3a-4d5b-a2c9-1f6e9d8b3006"),
+                    PaidAt = new DateTime(2026, 6, 9, 17, 30, 0, DateTimeKind.Utc),
+                    RentAmount = 150000m,
+                    UtilitiesAmount = 21750m,
+                    PeriodYear = 2026,
+                    PeriodMonth = 6,
+                    Note = null,
+                    TenantId = new Guid("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+                    PropertyId = new Guid("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d")
                 }
             );
         }
