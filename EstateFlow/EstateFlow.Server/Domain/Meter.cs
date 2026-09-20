@@ -17,5 +17,7 @@
 
         public int ProviderId { get; set; }
         public Provider? Provider { get; set; }
+
+        public ICollection<MeterReading> Readings { get; set; } = new List<MeterReading>();
     }
 }

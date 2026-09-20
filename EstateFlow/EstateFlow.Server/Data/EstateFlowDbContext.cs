@@ -12,6 +12,7 @@ namespace EstateFlow.Server.Data
         public DbSet<Meter> Meters => Set<Meter>();
         public DbSet<UtilityType> UtilityTypes => Set<UtilityType>();
         public DbSet<Provider> Providers => Set<Provider>();
+        public DbSet<MeterReading> MeterReadings => Set<MeterReading>();
 
         public EstateFlowDbContext(DbContextOptions options) : base(options)
         {
