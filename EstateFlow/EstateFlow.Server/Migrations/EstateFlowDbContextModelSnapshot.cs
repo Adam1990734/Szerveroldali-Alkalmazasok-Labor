@@ -61,6 +61,34 @@ namespace EstateFlow.Server.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EstateFlow.Server.Domain.Meter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("Meters");
+                });
+
             modelBuilder.Entity("EstateFlow.Server.Domain.Property", b =>
                 {
                     b.Property<Guid>("Id")
@@ -188,6 +216,17 @@ namespace EstateFlow.Server.Migrations
                             PropertyId = new Guid("9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"),
                             UploadedAt = new DateTime(2026, 2, 10, 9, 15, 0, 0, DateTimeKind.Utc)
                         });
+                });
+
+            modelBuilder.Entity("EstateFlow.Server.Domain.Meter", b =>
+                {
+                    b.HasOne("EstateFlow.Server.Domain.Property", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
                 });
 
             modelBuilder.Entity("EstateFlow.Server.Domain.Property", b =>
