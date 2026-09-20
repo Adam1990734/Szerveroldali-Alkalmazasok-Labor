@@ -2,6 +2,7 @@
 using EstateFlow.Server.Contracts.Properties;
 using EstateFlow.Server.Data;
 using EstateFlow.Server.Domain;
+using FluentValidation;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,16 @@ namespace EstateFlow.Server.Controllers
     public class PropertiesController : ControllerBase
     {
         private readonly EstateFlowDbContext _context;
+        private readonly IValidator<CreatePropertyRequest> _createValidator;
+        private readonly IValidator<UpdatePropertyRequest> _updateValidator;
 
-        public PropertiesController(EstateFlowDbContext context)
+        public PropertiesController(EstateFlowDbContext context, 
+            IValidator<CreatePropertyRequest> createValidator, 
+            IValidator<UpdatePropertyRequest> updateValidator)
         {
             _context = context;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         // GET: api/properties
@@ -69,6 +76,18 @@ namespace EstateFlow.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<PropertyResponse>> CreateProperty(CreatePropertyRequest request)
         {
+            var validationResult = await _createValidator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+
+                return ValidationProblem(ModelState);
+            }
+
             var property = new Property
             {
                 Id = Guid.NewGuid(),
@@ -95,6 +114,18 @@ namespace EstateFlow.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProperty(Guid id, UpdatePropertyRequest request)
         {
+            var validationResult = await _updateValidator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+
+                return ValidationProblem(ModelState);
+            }
+
             var property = await _context.Properties.FindAsync(id);
 
             if (property is null)

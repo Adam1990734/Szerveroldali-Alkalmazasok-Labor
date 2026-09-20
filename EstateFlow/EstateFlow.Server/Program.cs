@@ -1,4 +1,5 @@
 using EstateFlow.Server.Data;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
@@ -16,6 +17,8 @@ builder.Services.AddOpenApi(options =>
 
 builder.Services.AddDbContext<EstateFlowDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("EstateFlowDbConnection")));
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
