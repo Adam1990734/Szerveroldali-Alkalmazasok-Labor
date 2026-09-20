@@ -1,4 +1,5 @@
-﻿using EstateFlow.Server.Data;
+﻿using EstateFlow.Server.Contracts.Properties;
+using EstateFlow.Server.Data;
 using EstateFlow.Server.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +59,66 @@ namespace EstateFlow.Server.Controllers
                 .ToListAsync();
 
             return Ok(meters);
+        }
+
+        // POST: api/properties
+        [HttpPost]
+        public async Task<ActionResult<Property>> CreateProperty(CreatePropertyRequest request)
+        {
+            var property = new Property
+            {
+                Id = Guid.NewGuid(),
+                Code = request.Code,
+                Name = request.Name,
+                Address = request.Address,
+                SquareMeters = request.SquareMeters,
+                AdvertisementText = request.AdvertisementText,
+                CityId = request.CityId
+            };
+
+            _context.Properties.Add(property);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetProperty), new { id = property.Id }, property);
+        }
+
+        // PUT: api/properties/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProperty(Guid id, UpdatePropertyRequest request)
+        {
+            var property = await _context.Properties.FindAsync(id);
+
+            if (property is null)
+            {
+                return NotFound();
+            }
+
+            property.Name = request.Name;
+            property.Address = request.Address;
+            property.SquareMeters = request.SquareMeters;
+            property.AdvertisementText = request.AdvertisementText;
+            property.CityId = request.CityId;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // DELETE: api/properties/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProperty(Guid id)
+        {
+            var property = await _context.Properties.FindAsync(id);
+
+            if (property is null)
+            {
+                return NotFound();
+            }
+
+            _context.Properties.Remove(property);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
