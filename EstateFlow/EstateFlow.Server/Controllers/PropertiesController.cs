@@ -20,7 +20,9 @@ namespace EstateFlow.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Property>>> GetProperties()
         {
-            var properties = await _context.Properties.ToListAsync();
+            var properties = await _context.Properties
+                .Include(p => p.City)
+                .ToListAsync();
             return Ok(properties);
         }
 
@@ -28,7 +30,9 @@ namespace EstateFlow.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Property>> GetProperty(Guid id)
         {
-            var property = await _context.Properties.FindAsync(id);
+            var property = await _context.Properties
+                .Include(p => p.City)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (property is null)
             {
