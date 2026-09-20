@@ -1,6 +1,8 @@
-﻿using EstateFlow.Server.Contracts.Properties;
+﻿using EstateFlow.Server.Contracts.Meters;
+using EstateFlow.Server.Contracts.Properties;
 using EstateFlow.Server.Data;
 using EstateFlow.Server.Domain;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,21 +21,22 @@ namespace EstateFlow.Server.Controllers
 
         // GET: api/properties
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Property>>> GetProperties()
+        public async Task<ActionResult<IEnumerable<PropertyResponse>>> GetProperties()
         {
             var properties = await _context.Properties
-                .Include(p => p.City)
+                .ProjectToType<PropertyResponse>()
                 .ToListAsync();
             return Ok(properties);
         }
 
         // GET: api/properties/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Property>> GetProperty(Guid id)
+        public async Task<ActionResult<PropertyResponse>> GetProperty(Guid id)
         {
             var property = await _context.Properties
-                .Include(p => p.City)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Where(p => p.Id == id)
+                .ProjectToType<PropertyResponse>()
+                .FirstOrDefaultAsync();
 
             if (property is null)
             {
@@ -45,7 +48,7 @@ namespace EstateFlow.Server.Controllers
 
         // GET: api/properties/{id}/meters
         [HttpGet("{id}/meters")]
-        public async Task<ActionResult<IEnumerable<Meter>>> GetPropertyMeters(Guid id)
+        public async Task<ActionResult<IEnumerable<MeterResponse>>> GetPropertyMeters(Guid id)
         {
             var propertyExists = await _context.Properties.AnyAsync(p => p.Id == id);
 
@@ -56,6 +59,7 @@ namespace EstateFlow.Server.Controllers
 
             var meters = await _context.Meters
                 .Where(m => m.PropertyId == id)
+                .ProjectToType<MeterResponse>()
                 .ToListAsync();
 
             return Ok(meters);
@@ -63,7 +67,7 @@ namespace EstateFlow.Server.Controllers
 
         // POST: api/properties
         [HttpPost]
-        public async Task<ActionResult<Property>> CreateProperty(CreatePropertyRequest request)
+        public async Task<ActionResult<PropertyResponse>> CreateProperty(CreatePropertyRequest request)
         {
             var property = new Property
             {
@@ -79,7 +83,12 @@ namespace EstateFlow.Server.Controllers
             _context.Properties.Add(property);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetProperty), new { id = property.Id }, property);
+            var response = await _context.Properties
+                .Where(p => p.Id == property.Id)
+                .ProjectToType<PropertyResponse>()
+                .SingleAsync();
+
+            return CreatedAtAction(nameof(GetProperty), new { id = property.Id }, response);
         }
 
         // PUT: api/properties/{id}

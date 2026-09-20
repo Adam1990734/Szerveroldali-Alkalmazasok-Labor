@@ -7,7 +7,6 @@ namespace EstateFlow.Server.Domain
         public int Id { get; set; }
         public required string Name { get; set; }
 
-        [JsonIgnore]
         public ICollection<Property> Properties { get; set; } = new List<Property>();
     }
 }
