@@ -10,6 +10,8 @@ namespace EstateFlow.Server.Data
         public DbSet<Property> Properties => Set<Property>();
         public DbSet<PropertyImage> PropertyImages => Set<PropertyImage>();
         public DbSet<Meter> Meters => Set<Meter>();
+        public DbSet<UtilityType> UtilityTypes => Set<UtilityType>();
+        public DbSet<Provider> Providers => Set<Provider>();
 
         public EstateFlowDbContext(DbContextOptions options) : base(options)
         {
