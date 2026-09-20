@@ -1,5 +1,9 @@
-﻿using EstateFlow.Server.Data;
+﻿using EstateFlow.Server.Contracts.Meters;
+using EstateFlow.Server.Data;
 using EstateFlow.Server.Domain;
+using EstateFlow.Server.Services;
+using FluentValidation;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +14,16 @@ namespace EstateFlow.Server.Controllers
     public class MetersController : ControllerBase
     {
         private readonly EstateFlowDbContext _context;
+        private readonly IMeterReadingService _meterReadingService;
+        private readonly IValidator<SubmitMeterReadingRequest> _submitValidator;
 
-        public MetersController(EstateFlowDbContext context)
+        public MetersController(EstateFlowDbContext context, 
+            IMeterReadingService meterReadingService, 
+            IValidator<SubmitMeterReadingRequest> submitValidator)
         {
             _context = context;
+            _meterReadingService = meterReadingService;
+            _submitValidator = submitValidator;
         }
 
         // GET: api/meters
@@ -62,6 +72,39 @@ namespace EstateFlow.Server.Controllers
                 .ToListAsync();
 
             return Ok(readings);
+        }
+
+        // POST: api/meters/{id}/readings
+        [HttpPost("{id}/readings")]
+        public async Task<ActionResult<MeterReadingResponse>> SubmitReading(Guid id, SubmitMeterReadingRequest request)
+        {
+            var validationResult = await _submitValidator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+
+                return ValidationProblem(ModelState);
+            }
+
+            var result = await _meterReadingService.SubmitReadingAsync(id, request);
+
+            if (result.MeterNotFound)
+            {
+                return NotFound();
+            }
+
+            if (result.Error is not null)
+            {
+                return Problem(result.Error, statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            var response = result.Reading!.Adapt<MeterReadingResponse>();
+
+            return CreatedAtAction(nameof(GetMeterReadings), new { id }, response);
         }
     }
 }
