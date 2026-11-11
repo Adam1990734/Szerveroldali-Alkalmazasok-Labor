@@ -1,4 +1,0 @@
-﻿namespace EstateFlow.Infrastructure
-{
-    
-}
