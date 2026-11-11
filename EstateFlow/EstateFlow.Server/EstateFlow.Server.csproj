@@ -34,4 +34,9 @@
     <ProjectReference Include="..\EstateFlow.Infrastructure\EstateFlow.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="Domain\" />
+  </ItemGroup>
+
 </Project>
