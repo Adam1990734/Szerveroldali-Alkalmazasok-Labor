@@ -16,6 +16,11 @@ builder.Services.AddOpenApi(options =>
     options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 });
 
+builder.Services.AddDbContext<EstateFlowDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("EstateFlowDbConnection")
+    )
+);
 
 builder.Services.AddScoped<IApplicationDbContext>(provider =>
     provider.GetRequiredService<EstateFlowDbContext>()
