@@ -10,6 +10,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\**" />
+    <Compile Remove="Domain\**" />
+    <Content Remove="Data\**" />
+    <Content Remove="Domain\**" />
+    <EmbeddedResource Remove="Data\**" />
+    <EmbeddedResource Remove="Domain\**" />
+    <None Remove="Data\**" />
+    <None Remove="Domain\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>10.*-*</Version>
@@ -32,11 +43,6 @@
     </ProjectReference>
     <ProjectReference Include="..\EstateFlow.Application\EstateFlow.Application.csproj" />
     <ProjectReference Include="..\EstateFlow.Infrastructure\EstateFlow.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="Domain\" />
   </ItemGroup>
 
 </Project>
